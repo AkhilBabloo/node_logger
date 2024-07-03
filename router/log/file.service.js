@@ -1,12 +1,16 @@
-const { singleLineString, writeFileStream, defaultPlayers } = require("../../utils");
+const {
+  singleLineString,
+  writeFileStream,
+  defaultPlayers,
+} = require("../../utils");
 const fs = require("fs");
 const dayjs = require("dayjs");
 const path = require("path");
 const { groupBy, orderBy } = require("lodash");
 const archiver = require("archiver");
 const fsPromises = fs.promises;
-const CryptoJS = require('crypto-js');
-require('dotenv').config();
+const CryptoJS = require("crypto-js");
+require("dotenv").config();
 class FileService {
   constructor() {
     this.writeFileStream = writeFileStream;
@@ -22,7 +26,10 @@ class FileService {
 
     const replayResponse = orderBy(
       playerData.filter(
-        r => r.status === "AutoResponse" && r.tableId === tableId && r.place === "game"
+        (r) =>
+          r.status === "AutoResponse" &&
+          r.tableId === tableId &&
+          r.place === "game"
       ),
       "timestamp",
       "desc"
@@ -34,7 +41,10 @@ class FileService {
     let count = 0;
 
     for (const [index, rp] of replayResponse.entries()) {
-      if (rp.message[0].action === "WinnerResponse" && rp.message[0].playGroupId) {
+      if (
+        rp.message[0].action === "WinnerResponse" &&
+        rp.message[0].playGroupId
+      ) {
         count++;
         playGroupId = rp.message[0].playGroupId;
         temp = [];
@@ -43,28 +53,26 @@ class FileService {
           temp.push(re);
         }
       }
-      if (rp.message[0].action === "StartGameResponse" && playGroupId == rp.message[0].playGroupId) {
+      if (
+        rp.message[0].action === "StartGameResponse" &&
+        playGroupId == rp.message[0].playGroupId
+      ) {
         temp.push(rp);
         groupedData = [...groupedData, ...temp];
         if (count === groupCount) {
           break;
         }
-      } else if (rp.message[0].action === "StartGameResponse" && playGroupId !== rp.message[0].playGroupId) {
+      } else if (
+        rp.message[0].action === "StartGameResponse" &&
+        playGroupId !== rp.message[0].playGroupId
+      ) {
         temp = [];
       } else {
         temp.push(rp);
       }
     }
-    return orderBy(
-      [defaultPlayers, ...groupedData],
-      "timestamp",
-      "asc"
-    );
+    return orderBy([defaultPlayers, ...groupedData], "timestamp", "asc");
   }
-
-
-
-
 
   async downloadGameResponse(req, res) {
     const playerData = await this.getReplayDatas(req, res);
@@ -93,11 +101,14 @@ class FileService {
   async replay(req, res) {
     try {
       const filterByPlaygroup = await this.getReplayDatas(req, res);
-      const encryptedData = CryptoJS.AES.encrypt(JSON.stringify(filterByPlaygroup), process.env.AUTH_KEY).toString();
+      const encryptedData = CryptoJS.AES.encrypt(
+        JSON.stringify(filterByPlaygroup),
+        process.env.AUTH_KEY
+      ).toString();
       res.send(encryptedData);
     } catch (error) {
-      console.error('Error in replay:', error);
-      res.status(500).send('Internal Server Error');
+      console.error("Error in replay:", error);
+      res.status(500).send("Internal Server Error");
     }
   }
 
@@ -219,4 +230,4 @@ class FileService {
 const fileService = new FileService();
 
 module.exports = fileService;
-7
+7;

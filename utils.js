@@ -6,9 +6,7 @@ const { first, last } = require("lodash");
 const logsDir = path.join(__dirname, "logs");
 
 function objectToString(obj) {
-  return JSON.stringify(obj, null, 2)
-    .replace(/"(\w+)"\s*:/g, "$1:")
-    .replace(/"/g, "");
+  return JSON.stringify(obj);
 }
 
 const singleLineString = (d) => {
@@ -90,16 +88,18 @@ async function addLogToExistingFile(newLog, filePath) {
 
     const logs = Array.isArray(newLog) ? newLog : [newLog];
 
-
-
     const buffer = Buffer.alloc(2);
     await fileHandle.read(buffer, 0, 2, stats.size - 2);
     const lastChars = buffer.toString();
     if (lastChars === "[\n") {
-      const newContent = logs.map(log => JSON.stringify(log, null, 4)).join(",\n    ");
+      const newContent = logs
+        .map((log) => JSON.stringify(log, null, 4))
+        .join(",\n    ");
       await fileHandle.write(`    ${newContent}\n]`, stats.size - 1, "utf8");
     } else {
-      const newContent = logs.map(log => JSON.stringify(log, null, 4)).join(",\n    ");
+      const newContent = logs
+        .map((log) => JSON.stringify(log, null, 4))
+        .join(",\n    ");
       await fileHandle.write(`,\n    ${newContent}\n]`, stats.size - 1, "utf8");
     }
 
@@ -112,14 +112,13 @@ async function addLogToExistingFile(newLog, filePath) {
 
 const writeFileStream = (filePath, content) => {
   return new Promise((resolve, reject) => {
-    const writeStream = fs.createWriteStream(filePath, { flags: 'a' });
+    const writeStream = fs.createWriteStream(filePath, { flags: "a" });
     writeStream.write(content);
     writeStream.end();
-    writeStream.on('finish', resolve);
-    writeStream.on('error', reject);
+    writeStream.on("finish", resolve);
+    writeStream.on("error", reject);
   });
 };
-
 
 // async function addLogToExistingFile(newLog, filePath) {
 //   try {
@@ -133,20 +132,25 @@ const writeFileStream = (filePath, content) => {
 //   }
 // }
 
-
 const defaultPlayers = {
-  "status": "AutoResponse",
-  "playerId": "2656",
-  "timestamp": 1717566317051,
-  "message": [
-      {
-          "action": "DefaultPlayersUpdate",
-          players:[],
-          "roomId": 20246
-      }
+  status: "AutoResponse",
+  playerId: "2656",
+  timestamp: 1717566317051,
+  message: [
+    {
+      action: "DefaultPlayersUpdate",
+      players: [],
+      roomId: 20246,
+    },
   ],
-  "place": "game",
-  "tableId": 20246
-}
+  place: "game",
+  tableId: 20246,
+};
 
-module.exports = { singleLineString, writeJSON, writeBulkJSON,writeFileStream ,defaultPlayers};
+module.exports = {
+  singleLineString,
+  writeJSON,
+  writeBulkJSON,
+  writeFileStream,
+  defaultPlayers,
+};
