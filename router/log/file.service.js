@@ -120,8 +120,15 @@ class FileService {
       return res.status(404).send("Player not found");
     }
 
+    let error = [];
+
     const groupedValues = groupBy(
-      playerData.filter((r) => r.place),
+      playerData.filter((r) => {
+        if (r.status === "error") {
+          error.push(r);
+        }
+        return r.place;
+      }),
       (r) => r.place
     );
 
@@ -138,6 +145,7 @@ class FileService {
     const mergedData = {
       ...groupedValues,
       ...groupedDataWithTableName,
+      error,
     };
     try {
       for (const [status, values] of Object.entries(mergedData)) {
