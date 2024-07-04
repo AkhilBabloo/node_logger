@@ -114,6 +114,8 @@ class FileService {
 
   async downloadById(req, res) {
     const playerId = req.params.playerId;
+    const playGroupIdCount = req.query.count;
+
     const playerData = await this.downloadPlayerTotalDetails(req, res);
 
     if (playerData.length === 0) {
@@ -142,11 +144,33 @@ class FileService {
     for (const key in groupedGameData) {
       groupedDataWithTableName[`table_${key}`] = groupedGameData[key];
     }
+    const game = [];
+    let count = 0;
+
+    const orderByDesc = orderBy(
+      groupedValues["game"],
+      (r) => r.timestamp,
+      "desc"
+    );
+    for (let i = 0; i < orderByDesc.length; i++) {
+      const r = orderByDesc[i];
+
+      if (count > (playGroupIdCount || 4)) {
+        break;
+      }
+      if (r.message?.[5]?.data?.["cmd"] === "playGroupId") {
+        count++;
+      }
+      game.push(r);
+    }
+
     const mergedData = {
       ...groupedValues,
       ...groupedDataWithTableName,
       error,
+      game: orderBy(game, (r) => r.timestamp, "asc"),
     };
+
     try {
       for (const [status, values] of Object.entries(mergedData)) {
         const timestamp = new Date().getTime();
