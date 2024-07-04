@@ -148,7 +148,7 @@ class FileService {
     let count = 0;
 
     const orderByDesc = orderBy(
-      groupedValues["game"],
+      groupedValues?.["game"],
       (r) => r.timestamp,
       "desc"
     );
