@@ -24,8 +24,12 @@ class LogService {
   async createBulkLogs(req, res) {
     const playerId = req.params.playerId;
     return await this.commonLogCreation(req, res, async () => {
-      const logList = req.body.log.map((l) => new Log(playerId, l));
-      await writeBulkJSON(playerId, logList);
+      if (req.body.log && req.body.log.length === 0) {
+        return;
+      } else {
+        const logList = req.body.log.map((l) => new Log(playerId, l));
+        await writeBulkJSON(playerId, logList);
+      }
     });
   }
 
