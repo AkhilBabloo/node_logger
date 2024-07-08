@@ -73,6 +73,46 @@ class FileService {
     }
     return orderBy([defaultPlayers, ...groupedData], "timestamp", "asc");
   }
+  async getReplayDatasForShan(req, res) {
+    const roomName = Number(req.params.roomName);
+    // const groupCount =  req.query.count|| 4;
+    const playerData = await this.downloadPlayerTotalDetails(req, res);
+
+    if (playerData.length === 0) {
+      return [];
+    }
+
+    const replayResponse = orderBy(
+      playerData.filter(
+        (r) =>
+          r.status === "AutoResponse" &&
+          // r.place === "Game" &&
+          r.tableId == roomName
+      ),
+      "timestamp",
+      "desc"
+    );
+
+    let groupedData = [];
+    let temp = [];
+    let playGroupId;
+    let count = 0;
+
+    // for (const [index, rp] of replayResponse.entries()) {
+    //   if (rp.message?.[0]?.data?.["cmd"] === "playGroupId") {
+    //     count++;
+    //     if (count === 1) {
+    //       groupedData.push(rp);
+    //       break;
+    //     }
+    //     groupedData.push(rp);
+    //   } else {
+    //     groupedData.push(rp);
+    //   }
+    // }
+
+    return orderBy(replayResponse, "timestamp", "asc");
+  }
 
   async downloadGameResponse(req, res) {
     const playerData = await this.getReplayDatas(req, res);
@@ -105,7 +145,21 @@ class FileService {
         JSON.stringify(filterByPlaygroup),
         process.env.AUTH_KEY
       ).toString();
-      res.send(encryptedData);
+      res.send(encryfilterByPlaygroupptedData);
+    } catch (error) {
+      console.error("Error in replay:", error);
+      res.status(500).send("Internal Server Error");
+    }
+  }
+
+  async replayShan(req, res) {
+    try {
+      const filterByPlaygroup = await this.getReplayDatasForShan(req, res);
+      // const encryptedData = CryptoJS.AES.encrypt(
+      //   JSON.stringify(filterByPlaygroup),
+      //   process.env.AUTH_KEY
+      // ).toString();
+      res.send(filterByPlaygroup);
     } catch (error) {
       console.error("Error in replay:", error);
       res.status(500).send("Internal Server Error");
