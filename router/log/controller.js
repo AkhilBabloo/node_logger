@@ -22,7 +22,9 @@ router.get("/replay/:playerId/:tableId", (req, res) => {
 router.get("/gameResponse/:playerId/:tableId", (req, res) => {
   return fileService.downloadGameResponse(req, res);
 });
-
+router.get("/replayShan/:playerId/:roomName", (req, res) => {
+  return fileService.replayShan(req, res);
+});
 // cron.schedule('0 8 * * *', () => {
 //     logService.cleanOldLogs();
 // });
