@@ -25,6 +25,9 @@ router.get("/gameResponse/:playerId/:tableId", (req, res) => {
 router.get("/replayShan/:playerId/:roomName", (req, res) => {
   return fileService.replayShan(req, res);
 });
+router.delete("/deleteLogFolder/:playerId", (req, res) => {
+  return fileService.deleteLogFolder(req, res);
+});
 // cron.schedule('0 8 * * *', () => {
 //     logService.cleanOldLogs();
 // });

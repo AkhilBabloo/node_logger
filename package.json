@@ -11,7 +11,9 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@apla/clickhouse": "^1.6.4",
     "archiver": "^7.0.1",
+    "clickhouse": "^2.6.0",
     "cors": "^2.8.5",
     "crypto-js": "^4.2.0",
     "dayjs": "^1.11.11",
@@ -21,6 +23,7 @@
     "lodash": "^4.17.21",
     "node-cron": "^3.0.3",
     "node-stream-zip": "^1.15.0",
-    "nodemon": "^3.1.0"
+    "nodemon": "^3.1.0",
+    "redis": "^4.6.15"
   }
 }

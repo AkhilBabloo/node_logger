@@ -28,6 +28,14 @@ const writeJSON = async (playerId, log) => {
   await addLogEntry(log, playerDir);
 };
 
+const deleteFolder = async (playerId) => {
+  const playerDir = path.join(logsDir, playerId);
+  if (!fs.existsSync(playerDir)) {
+    return "done";
+  }
+  fs.rmSync(playerDir, { recursive: true, force: true });
+};
+
 const writeBulkJSON = async (playerId, loglist) => {
   const playerDir = path.join(logsDir, playerId);
   if (!fs.existsSync(playerDir)) {
@@ -153,4 +161,5 @@ module.exports = {
   writeBulkJSON,
   writeFileStream,
   defaultPlayers,
+  deleteFolder,
 };

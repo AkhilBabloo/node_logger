@@ -2,6 +2,7 @@ const {
   singleLineString,
   writeFileStream,
   defaultPlayers,
+  deleteFolder,
 } = require("../../utils");
 const fs = require("fs");
 const dayjs = require("dayjs");
@@ -74,19 +75,27 @@ class FileService {
     return orderBy([defaultPlayers, ...groupedData], "timestamp", "asc");
   }
   async getReplayDatasForShan(req, res) {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 200;
     const roomName = Number(req.params.roomName);
     // const groupCount =  req.query.count|| 4;
     const playerData = await this.downloadPlayerTotalDetails(req, res);
 
     if (playerData.length === 0) {
-      return [];
+      return {
+        page,
+        limit,
+        totalItems: 0,
+        totalPages: 0,
+        data: [],
+      };
     }
 
     const replayResponse = orderBy(
       playerData.filter(
         (r) =>
           r.status === "AutoResponse" &&
-          // r.place === "Game" &&
+          r.place === "Game" &&
           r.tableId == roomName
       ),
       "timestamp",
@@ -111,7 +120,19 @@ class FileService {
     //   }
     // }
 
-    return orderBy(replayResponse, "timestamp", "asc");
+    const startIndex = (page - 1) * limit;
+    const endIndex = page * limit;
+    const replayResponse2 = orderBy(replayResponse, "timestamp", "asc");
+
+    const paginatedItems = replayResponse2.slice(startIndex, endIndex);
+    const response = {
+      page,
+      limit,
+      totalItems: replayResponse2.length,
+      totalPages: Math.ceil(replayResponse2.length / limit),
+      data: orderBy(paginatedItems, "timestamp", "asc"),
+    };
+    return response;
   }
 
   async downloadGameResponse(req, res) {
@@ -311,9 +332,18 @@ class FileService {
 
     return allLogs.sort((a, b) => a.timestamp - b.timestamp);
   }
+  async deleteLogFolder(req, res) {
+    const playerId = req.params.playerId;
+    try {
+      await deleteFolder(playerId);
+      res.send("success");
+    } catch (err) {
+      console.log(err);
+      return res.status(500).send("Internal Server Error");
+    }
+  }
 }
 
 const fileService = new FileService();
 
 module.exports = fileService;
-7;
