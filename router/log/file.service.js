@@ -7,7 +7,7 @@ const {
 const fs = require("fs");
 const dayjs = require("dayjs");
 const path = require("path");
-const { groupBy, orderBy } = require("lodash");
+const { groupBy, orderBy, last } = require("lodash");
 const archiver = require("archiver");
 const fsPromises = fs.promises;
 const CryptoJS = require("crypto-js");
@@ -91,12 +91,14 @@ class FileService {
       };
     }
 
+    const firstGame = playerData.find((r) => r.place == "Game");
     const replayResponse = orderBy(
       playerData.filter(
         (r) =>
-          r.status === "AutoResponse" &&
-          r.place === "Game" &&
-          r.tableId == roomName
+          (r.status === "AutoResponse" || r.status === "Request") &&
+          (firstGame?.timestamp ?? 0) <= r.timestamp
+        // r.place === "Game" &&
+        // r.tableId == roomName
       ),
       "timestamp",
       "desc"
@@ -131,10 +133,10 @@ class FileService {
       totalItems: replayResponse2.length,
       totalPages: Math.ceil(replayResponse2.length / limit),
       data: orderBy(paginatedItems, "timestamp", "asc"),
+      timeDiff: last(replayResponse2).timestamp - (firstGame?.timestamp ?? 0),
     };
     return response;
   }
-
   async downloadGameResponse(req, res) {
     const playerData = await this.getReplayDatas(req, res);
     const files = [];
